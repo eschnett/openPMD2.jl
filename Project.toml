@@ -1,0 +1,7 @@
+name = "openPMD2"
+uuid = "40826d16-586e-4e05-8257-7b159fecf658"
+authors = ["Erik Schnetter <schnetter@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+openPMD_api_C_jll = "717b25aa-b29e-5818-a412-ef79ff689db4"
