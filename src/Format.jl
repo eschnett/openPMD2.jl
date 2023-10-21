@@ -22,7 +22,7 @@ function determineFormat(filename::AbstractString)::Format
 end
 
 """
-    function openPMD2.suffix(format::Format)::String
+    function openPMD2.suffix(format::Format)::AbstractString
 """
 function suffix(format::Format)
     #TODO suf = @ccall libopenPMD_c.openPMD_suffix(format::Format)::Cstring
