@@ -4,4 +4,5 @@ authors = ["Erik Schnetter <schnetter@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
 openPMD_api_C_jll = "717b25aa-b29e-5818-a412-ef79ff689db4"

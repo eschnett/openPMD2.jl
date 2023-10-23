@@ -1,26 +1,29 @@
 """
-    function openPMD2.getVersion()::AbstractString
+    function openPMD_getVersion()::AbstractString
 """
-function getVersion()
+function openPMD_get_version()
     version = @ccall libopenPMD_c.openPMD_getVersion()::Cstring
     return unsafe_string(version)
 end
+export openPMD_get_version
 
 """
-    function openPMD2.getStandard()::AbstractString
+    function openPMD_getStandard()::AbstractString
 """
-function getStandard()
+function openPMD_get_standard()
     standard = @ccall libopenPMD_c.openPMD_getStandard()::Cstring
     return unsafe_string(standard)
 end
+export openPMD_get_standard
 
 """
-    function openPMD2.getStandardMinimum()::AbstractString
+    function openPMD_getStandardMinimum()::AbstractString
 """
-function getStandardMinimum()
+function openPMD_get_standard_minimum()
     standard_minimum = @ccall libopenPMD_c.openPMD_getStandardMinimum()::Cstring
     return unsafe_string(standard_minimum)
 end
+export openPMD_get_standard_minimum
 
 struct CVariant
     variant::Cstring
@@ -28,9 +31,9 @@ struct CVariant
 end
 
 """
-    function openPMD2.getVariants()::Dict{AbstractString,Bool}
+    function openPMD_getVariants()::AbstractDict{AbstractString,Bool}
 """
-function getVariants()
+function openPMD_get_variants()
     c_variants = @ccall libopenPMD_c.openPMD_getVariants()::Ptr{CVariant}
     variants = Dict{AbstractString,Bool}()
     n = 0
@@ -42,11 +45,12 @@ function getVariants()
     end
     return variants::Dict{AbstractString,Bool}
 end
+export openPMD_get_variants
 
 """
-    function openPMD2.getFileExtensions()::Set{<:AbstractString}
+    function openPMD_getFileExtensions()::AbstractSet{<:AbstractString}
 """
-function getFileExtensions()
+function openPMD_get_file_extensions()
     c_file_extensions = @ccall libopenPMD_c.openPMD_getFileExtensions()::Ptr{Cstring}
     file_extensions = Set{String}()
     n = 0
@@ -56,5 +60,6 @@ function getFileExtensions()
         c_file_extension == Ptr{Cchar}() && break
         push!(file_extensions, unsafe_string(c_file_extension))
     end
-    return file_extensions::Set{<:AbstractString}
+    return file_extensions::AbstractSet{<:AbstractString}
 end
+export openPMD_get_file_extensions

@@ -1,45 +1,45 @@
 @testset "Access" begin
-    @test openPMD2.Access isa Type
+    @test Access isa Type
 
-    ro = openPMD2.Access_READ_ONLY
-    ra = openPMD2.Access_READ_RANDOM_ACCESS
-    rl = openPMD2.Access_READ_LINEAR
-    rw = openPMD2.Access_READ_WRITE
-    cr = openPMD2.Access_CREATE
-    ap = openPMD2.Access_APPEND
+    ro = Access_READ_ONLY
+    ra = Access_READ_RANDOM_ACCESS
+    rl = Access_READ_LINEAR
+    rw = Access_READ_WRITE
+    cr = Access_CREATE
+    ap = Access_APPEND
 
-    @test ro isa openPMD2.Access
-    @test ra isa openPMD2.Access
-    @test rl isa openPMD2.Access
-    @test rw isa openPMD2.Access
-    @test cr isa openPMD2.Access
-    @test ap isa openPMD2.Access
+    @test ro isa Access
+    @test ra isa Access
+    @test rl isa Access
+    @test rw isa Access
+    @test cr isa Access
+    @test ap isa Access
 
-    @test openPMD2.Access_readOnly(ro)
-    @test openPMD2.Access_readOnly(ra)
-    @test openPMD2.Access_readOnly(rl)
-    @test !openPMD2.Access_readOnly(rw)
-    @test !openPMD2.Access_readOnly(cr)
-    @test !openPMD2.Access_readOnly(ap)
+    @test isreadonly(ro)
+    @test isreadonly(ra)
+    @test isreadonly(rl)
+    @test !isreadonly(rw)
+    @test !isreadonly(cr)
+    @test !isreadonly(ap)
 
-    @test openPMD2.Access_read(ro)
-    @test openPMD2.Access_read(ra)
-    @test openPMD2.Access_read(rl)
-    @test openPMD2.Access_read(rw)
-    @test !openPMD2.Access_read(cr)
-    @test !openPMD2.Access_read(ap)
+    @test isreadable(ro)
+    @test isreadable(ra)
+    @test isreadable(rl)
+    @test isreadable(rw)
+    @test !isreadable(cr)
+    @test !isreadable(ap)
 
-    @test !openPMD2.Access_writeOnly(ro)
-    @test !openPMD2.Access_writeOnly(ra)
-    @test !openPMD2.Access_writeOnly(rl)
-    @test !openPMD2.Access_writeOnly(rw)
-    @test openPMD2.Access_writeOnly(cr)
-    @test openPMD2.Access_writeOnly(ap)
+    @test !iswriteonly(ro)
+    @test !iswriteonly(ra)
+    @test !iswriteonly(rl)
+    @test !iswriteonly(rw)
+    @test iswriteonly(cr)
+    @test iswriteonly(ap)
 
-    @test !openPMD2.Access_write(ro)
-    @test !openPMD2.Access_write(ra)
-    @test !openPMD2.Access_write(rl)
-    @test openPMD2.Access_write(rw)
-    @test openPMD2.Access_write(cr)
-    @test openPMD2.Access_write(ap)
+    @test !iswritable(ro)
+    @test !iswritable(ra)
+    @test !iswritable(rl)
+    @test iswritable(rw)
+    @test iswritable(cr)
+    @test iswritable(ap)
 end

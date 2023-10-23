@@ -1,27 +1,37 @@
 @testset "Format" begin
-    @test openPMD2.Format isa Type
+    @test Format isa Type
 
-    format = openPMD2.determineFormat("file.h5")
-    @test format == openPMD2.Format_HDF5
+    format = determine_format("file.h5")
+    @test format === Format_HDF5
 
-    format = openPMD2.determineFormat("file.bp")
-    @test format == openPMD2.Format_ADIOS2_BP
+    format = determine_format("file.bp")
+    @test format === Format_ADIOS2_BP
 
-    format = openPMD2.determineFormat("file.bp4")
-    @test format == openPMD2.Format_ADIOS2_BP4
+    format = determine_format("file.bp4")
+    @test format === Format_ADIOS2_BP4
 
-    format = openPMD2.determineFormat("file.bp5")
-    @test format == openPMD2.Format_ADIOS2_BP5
+    format = determine_format("file.bp5")
+    @test format === Format_ADIOS2_BP5
 
-    format = openPMD2.determineFormat("file.json")
-    @test format == openPMD2.Format_JSON
+    format = determine_format("file.json")
+    @test format === Format_JSON
 
-    format = openPMD2.determineFormat("file.toml")
-    @test format == openPMD2.Format_TOML
+    format = determine_format("file.toml")
+    @test format === Format_TOML
 
-    for format in instances(openPMD2.Format)
-        suffix = openPMD2.suffix(format)
-        @test suffix isa String
-        @test length(suffix) > 0
+    for format in instances(Format)
+        suf = suffix(format)
+        @test suf isa String
+        if format === Format_DUMMY
+            @test isempty(suf)
+        else
+            @test startswith(suf, ".")
+            @test length(suf) > 1
+
+            format′ = determine_format("file$suf")
+            @test format′ === format
+            suf′ = suffix(format′)
+            @test suf′ == suf
+        end
     end
 end
