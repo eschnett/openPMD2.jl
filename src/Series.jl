@@ -1,18 +1,20 @@
 """
-    struct Series
+    mutable struct Series
 """
-struct Series
+mutable struct Series
     c_series_ptr::Ptr{Cvoid}
-    object::Object
     function Series(c_series_ptr::Ptr{Cvoid})
-        object = Object(_ -> Series_delete!(c_series_ptr))
-        return new(c_series_ptr, object)
+        series = new(c_series_ptr)
+        finalizer(Series_delete!, series)
+        return series
     end
 end
 export Series
 
-function Series_delete!(c_series_ptr::Ptr{Cvoid})
-    @ccall libopenPMD_c.openPMD_Series_delete(c_series_ptr::Ptr{Cvoid})::Cvoid
+Base.cconvert(::Type{Ptr{Cvoid}}, series::Series) = series.c_series_ptr
+
+function Series_delete!(series::Series)
+    @ccall libopenPMD_c.openPMD_Series_delete(series::Ptr{Cvoid})::Cvoid
     return nothing
 end
 
@@ -56,31 +58,13 @@ function Series(filepath::AbstractString, access::Access, comm::MPI.Comm, option
 end
 
 """
-    function getindex(series::Series, key::AbstractString)::Union{Nothing,Datatypes}
+    function attributes(series::Series)::Attributes
 """
-function Base.getindex(series::Series, key::AbstractString)
-    c_attr = @ccall libopenPMD_c.openPMD_Series_getConstAttributable(series.c_series_ptr::Ptr{Cvoid})::Ptr{Cvoid}
-    attr = Attributable(c_attr, series.object)
-    return get_attribute(attr, key)
+function attributes(series::Series)::Attributes
+    c_attributes = @ccall libopenPMD_c.openPMD_Series_getAttributable(series.c_series_ptr::Ptr{Cvoid})::Ptr{Cvoid}
+    return Attributes(c_attributes, series)
 end
-
-"""
-    function setindex!(series::Series, value::Datatypes, key::AbstractString)::Nothing
-"""
-function Base.setindex!(series::Series, value::Datatypes, key::AbstractString)
-    c_attr = @ccall libopenPMD_c.openPMD_Series_getAttributable(series.c_series_ptr::Ptr{Cvoid})::Ptr{Cvoid}
-    attr = Attributable(c_attr, series.object)
-    return set_attribute!(attr, key, value)
-end
-
-"""
-    function in(key::AbstractString, series::Series)::Bool
-"""
-function Base.in(key::AbstractString, series::Series)
-    c_attr = @ccall libopenPMD_c.openPMD_Series_getConstAttributable(series.c_series_ptr::Ptr{Cvoid})::Ptr{Cvoid}
-    c_contains = @ccall libopenPMD_c.openPMD_Attributable_containsAttribute(c_attr::Ptr{Cvoid}, key::Cstring)::UInt8
-    return Bool(c_contains)
-end
+export attributes
 
 """
     function isvalid(series::Series)::Bool
@@ -371,8 +355,14 @@ function Base.flush(series::Series, backend_config::Union{Nothing,AbstractString
     return nothing
 end
 
-#    openPMD_ReadIterations *
-#    openPMD_Series_readIteration(openPMD_Series *series);
+"""
+    function read_iteration(series::Series)::ReadIterations
+"""
+function read_iteration(series::Series)
+    c_read_iterations = @ccall libopenPMD_c.openPMD_Series_readIteration(series.c_series_ptr::Ptr{Cvoid})::Ptr{Cvoid}
+    return ReadIterations(c_read_iterations)
+end
+export read_iteration
 
 """
     function parse_base(series::Series)::Nothing
@@ -383,8 +373,14 @@ function parse_base(series::Series)
 end
 export parse_base
 
-#    openPMD_WriteIterations *
-#    openPMD_Series_writeIteration(openPMD_Series *series);
+"""
+    function write_iteration(series::Series)::WriteIterations
+"""
+function write_iteration(series::Series)
+    c_write_iterations = @ccall libopenPMD_c.openPMD_Series_writeIteration(series.c_series_ptr::Ptr{Cvoid})::Ptr{Cvoid}
+    return WriteIterations(c_write_iterations)
+end
+export write_iteration
 
 """
     function close(series::Series)::Nothing

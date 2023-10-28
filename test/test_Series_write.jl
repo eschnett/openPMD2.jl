@@ -4,16 +4,17 @@
         @test !isvalid(series)
     end
 
-    # tmpdir = Filesystem.mktempdir(; cleanup=true)
-    tmpdir = "/tmp"
-    filename = joinpath(tmpdir, "hello.json")
-
     series = Series(filename, Access_CREATE)
     @test isvalid(series)
 
-    series["hello"] = Cint(42)
-    @test "hello" in series
-    @test series["hello"] === Cint(42)
+    @test attributes(series) isa Attributes
+    @test keys(attributes(series)) isa AttributeKeys
+    @test length(keys(attributes(series))) == length(attributes(series))
+    @test length(collect(keys(attributes(series)))) == length(keys(attributes(series)))
+
+    attributes(series)["hello"] = Cint(42)
+    @test "hello" in keys(attributes(series))
+    @test attributes(series)["hello"] === Cint(42)
 
     openPMD_version = get_openPMD_version(series)
     @test openPMD_version isa AbstractString
@@ -29,7 +30,7 @@
     @test !isempty(base_path)
     @test_throws ErrorException set_base_path!(series, base_path)
 
-    if "meshesPath" in series
+    if "meshesPath" in keys(attributes(series))
         meshes_path = get_meshes_path(series)
     else
         meshes_path = "meshes"
@@ -39,7 +40,7 @@
     set_meshes_path!(series, meshes_path)
     @test get_meshes_path(series) == "meshes/"
 
-    if "particlesPath" in series
+    if "particlesPath" in keys(attributes(series))
         particles_path = get_particles_path(series)
     else
         particles_path = "particles"
@@ -49,14 +50,14 @@
     set_particles_path!(series, particles_path)
     @test get_particles_path(series) == "particles/"
 
-    @test !("author" in series)
+    @test !("author" in keys(attributes(series)))
     set_author!(series, "Anton Notenquetscher")
-    @test "author" in series
+    @test "author" in keys(attributes(series))
     @test get_author(series) == "Anton Notenquetscher"
 
     software = get_software(series)
     @test !isempty(software)
-    software_version = series["softwareVersion"]
+    software_version = attributes(series)["softwareVersion"]
     @test !isempty(software_version)
     set_software!(series, software, software_version)
 
@@ -64,7 +65,7 @@
     @test !isempty(date)
     set_date!(series, date)
 
-    if "softwareDependencies" in series
+    if "softwareDependencies" in keys(attributes(series))
         software_dependencies = get_software_dependencies(series)
     else
         software_dependencies = """{"ADIOS2","HDF5"}"""
@@ -73,7 +74,7 @@
     set_software_dependencies!(series, software_dependencies)
     @test get_software_dependencies(series) == software_dependencies
 
-    if "machine" in series
+    if "machine" in keys(attributes(series))
         machine = get_machine(series)
     else
         machine = gethostname()
@@ -91,7 +92,7 @@
     @test !isempty(iteration_format)
     set_iteration_format!(series, iteration_format)
 
-    if "name" in series
+    if "name" in keys(attributes(series))
         name = get_name(series)
     else
         name = "hello"
@@ -108,5 +109,18 @@
 
     parse_base(series)
 
+    write_iterations = write_iteration(series)
+    iteration = write_iterations[0]
+
+    curr = current_iteration(write_iterations)
+
+    @test !isclosed(iteration)
+
+    @test get_time(iteration) == 0
+    @test get_dt(iteration) == 1
+    @test get_time_unit_SI(iteration) == 1
+
     close(series)
 end
+
+GC.gc()

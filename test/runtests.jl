@@ -12,6 +12,11 @@ include("test_Format.jl")
 include("test_IterationEncoding.jl")
 include("test_UnitDimension.jl")
 
-include("test_Attributable.jl")
+include("test_Attributes.jl")
 
-include("test_Series.jl")
+# tmpdir = Filesystem.mktempdir(; cleanup=true)
+tmpdir = "/tmp"
+filename = joinpath(tmpdir, "hello.json")
+
+include("test_Series_write.jl")
+include("test_Series_read.jl")

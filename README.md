@@ -13,3 +13,6 @@ This is a temporary repository while I restructure the Julia wrapper
 to using the new C bindings in openPMD-api. See
 [here](https://eschnett.github.io/openPMD.jl/) for the current
 (working) Julia wrapper.
+
+CI is failing because the jll packge for the C bindings for
+openPMD-api are not yet a registered Julia package.
