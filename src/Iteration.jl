@@ -79,7 +79,7 @@ export get_time_unit_SI
     function set_time_unit_SI!(iteration::Iteration, time_unit_SI::Real)::Nothing
 """
 function set_time_unit_SI!(iteration::Iteration, time_unit_SI::Real)
-    @ccall libopenPMD_c.openPMD_Iteration_setTime_unit_SI(iteration.c_iteration_ptr::Ptr{Cvoid}, time_unit_SI::Cdouble)::Cvoid
+    @ccall libopenPMD_c.openPMD_Iteration_setTimeUnitSI(iteration.c_iteration_ptr::Ptr{Cvoid}, time_unit_SI::Cdouble)::Cvoid
     return nothing
 end
 export set_time_unit_SI!

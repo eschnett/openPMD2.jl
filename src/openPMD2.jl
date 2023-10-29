@@ -14,10 +14,12 @@ include("IterationEncoding.jl")
 include("UnitDimension.jl")
 
 include("Attributes.jl")
-
 include("Iteration.jl")
+
+include("Iterations.jl")
 include("ReadIterations.jl")
 include("WriteIterations.jl")
+
 include("Series.jl")
 
 end

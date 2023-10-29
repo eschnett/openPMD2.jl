@@ -59,16 +59,33 @@
     @test !isempty(backend)
     @test backend == "JSON"
 
-    #TODO read_iterations = read_iteration(series)
-    #TODO iteration = read_iterations[0]
+    # Read serially
+    read_iters = read_iterations(series)
+    #TODO iter = read_iters[]
+    #TODO
+    #TODO @test !isclosed(iter)
     #TODO 
-    #TODO curr = current_iteration(read_iterations)
+    #TODO get_time(iter)
+    #TODO get_dt(iter)
+    #TODO get_time_unit_SI(iter)
     #TODO 
-    #TODO @test !isclosed(iteration)
-    #TODO 
-    #TODO get_time(iteration)
-    #TODO #TODO get_dt(iteration)
-    #TODO get_time_unit_SI(iteration)
+    #TODO close(iter)
+    #TODO @test isclosed(iter)
+
+    # Read with random access
+    iters = iterations(series)
+    iter = iters[0]
+
+    @test !isclosed(iter)
+
+    get_time(iter)
+    get_dt(iter)
+    get_time_unit_SI(iter)
+
+    @test attributes(iter)["ship"] === 43
+
+    close(iter)
+    @test isclosed(iter)
 
     close(series)
 end

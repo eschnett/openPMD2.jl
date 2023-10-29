@@ -109,16 +109,28 @@
 
     parse_base(series)
 
-    write_iterations = write_iteration(series)
-    iteration = write_iterations[0]
+    write_iters = write_iterations(series)
+    iter = write_iters[0]
 
-    curr = current_iteration(write_iterations)
+    curr = current_iteration(write_iters)
 
-    @test !isclosed(iteration)
+    @test !isclosed(iter)
 
-    @test get_time(iteration) == 0
-    @test get_dt(iteration) == 1
-    @test get_time_unit_SI(iteration) == 1
+    @test get_time(iter) == 0
+    @test get_dt(iter) == 1
+    @test get_time_unit_SI(iter) == 1
+    set_time!(iter, 10)
+    set_dt!(iter, 1)
+    set_time_unit_SI!(iter, 1476.6250614046494)
+    @test get_time(iter) == 10
+    @test get_dt(iter) == 1
+    @test get_time_unit_SI(iter) == 1476.6250614046494
+
+    attributes(iter)["ship"] = 43
+    @test attributes(iter)["ship"] === 43
+
+    close(iter)
+    @test isclosed(iter)
 
     close(series)
 end

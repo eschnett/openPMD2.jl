@@ -67,6 +67,15 @@ end
 export attributes
 
 """
+    function iterations(series::Series)::Iterations
+"""
+function iterations(series::Series)
+    c_iterations = @ccall libopenPMD_c.openPMD_Series_iterations(series.c_series_ptr::Ptr{Cvoid})::Ptr{Cvoid}
+    return Iterations(c_iterations, series)
+end
+export iterations
+
+"""
     function isvalid(series::Series)::Bool
 """
 function Base.isvalid(series::Series)
@@ -356,13 +365,13 @@ function Base.flush(series::Series, backend_config::Union{Nothing,AbstractString
 end
 
 """
-    function read_iteration(series::Series)::ReadIterations
+    function read_iterations(series::Series)::ReadIterations
 """
-function read_iteration(series::Series)
+function read_iterations(series::Series)
     c_read_iterations = @ccall libopenPMD_c.openPMD_Series_readIteration(series.c_series_ptr::Ptr{Cvoid})::Ptr{Cvoid}
     return ReadIterations(c_read_iterations)
 end
-export read_iteration
+export read_iterations
 
 """
     function parse_base(series::Series)::Nothing
@@ -374,13 +383,13 @@ end
 export parse_base
 
 """
-    function write_iteration(series::Series)::WriteIterations
+    function write_iterations(series::Series)::WriteIterations
 """
-function write_iteration(series::Series)
+function write_iterations(series::Series)
     c_write_iterations = @ccall libopenPMD_c.openPMD_Series_writeIteration(series.c_series_ptr::Ptr{Cvoid})::Ptr{Cvoid}
     return WriteIterations(c_write_iterations)
 end
-export write_iteration
+export write_iterations
 
 """
     function close(series::Series)::Nothing
