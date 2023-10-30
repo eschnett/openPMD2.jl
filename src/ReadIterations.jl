@@ -17,3 +17,5 @@ function ReadIterations_delete!(read_iterations::ReadIterations)
     @ccall libopenPMD_c.openPMD_ReadIterations_delete(read_iterations::Ptr{Cvoid})::Cvoid
     return nothing
 end
+
+# TODO: Implement this (even missing from C API, need to wrap ReadIterations iterator)

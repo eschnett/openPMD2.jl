@@ -27,6 +27,12 @@ for (suffix, Type) in [("schar", Cchar), ("short", Cshort), ("int", Cint), ("lon
         did_exist = @ccall libopenPMD_c.$funname(attributes::Ptr{Cvoid}, key::Cstring, value::$Type)::UInt8
         return Bool(did_exist)
     end
+    funname = Symbol(:openPMD_Attributable_setAttribute_vec_, suffix)
+    @eval function set_attribute!(attributes::Attributes, key::AbstractString, values::AbstractVector{$Type})
+        did_exist = @ccall libopenPMD_c.$funname(attributes::Ptr{Cvoid}, key::Cstring, values::Ref{$Type},
+                                                 length(values)::Csize_t)::UInt8
+        return Bool(did_exist)
+    end
 end
 function set_attribute!(attributes::Attributes, key::AbstractString, value::Char)
     did_exist = @ccall libopenPMD_c.openPMD_Attributable_setAttribute_char(attributes::Ptr{Cvoid}, key::Cstring,
@@ -34,8 +40,24 @@ function set_attribute!(attributes::Attributes, key::AbstractString, value::Char
     return Bool(did_exist)
 end
 function set_attribute!(attributes::Attributes, key::AbstractString, value::AbstractString)
-    did_exist = @ccall libopenPMD_c.openPMD_Attributable_setAttribute_char(attributes::Ptr{Cvoid}, key::Cstring,
-                                                                           value::Cstring)::UInt8
+    did_exist = @ccall libopenPMD_c.openPMD_Attributable_setAttribute_string(attributes::Ptr{Cvoid}, key::Cstring,
+                                                                             value::Cstring)::UInt8
+    return Bool(did_exist)
+end
+function set_attribute!(attributes::Attributes, key::AbstractString, values::AbstractVector{Char})
+    did_exist = @ccall libopenPMD_c.openPMD_Attributable_setAttribute_vec_char(attributes::Ptr{Cvoid}, key::Cstring,
+                                                                               values::Ref{Cchar}, length(values)::Csize_t)::UInt8
+    return Bool(did_exist)
+end
+function set_attribute!(attributes::Attributes, key::AbstractString, values::AbstractVector{<:AbstractString})
+    c_values = Ptr{Cchar}[Base.unsafe_convert(Ptr{Cchar}, val) for val in values]
+    did_exist = @ccall libopenPMD_c.openPMD_Attributable_setAttribute_vec_string(attributes::Ptr{Cvoid}, key::Cstring,
+                                                                                 c_values::Ptr{Ptr{Cchar}},
+                                                                                 length(c_values)::Csize_t)::UInt8
+    # Keep Julia strings alive
+    for value in values
+        @ccall snprintf(Ptr{Cchar}()::Ptr{Cchar}, 0::Csize_t, ""::Cstring, value::Cstring)::Cvoid
+    end
     return Bool(did_exist)
 end
 function set_attribute!(attributes::Attributes, key::AbstractString, value::Bool)
@@ -56,7 +78,7 @@ function get_attribute(attributes::Attributes, key::AbstractString)
     c_datatype = @ccall libopenPMD_c.openPMD_Attributable_attributeDatatype(attributes::Ptr{Cvoid}, key::Cstring)::Cint
     datatype = Datatype(c_datatype)
     T = get(julia_types, datatype, nothing)
-    T === nothing && throw(TypeError("openPMD type $datatype is not supported in Julia"))
+    T === nothing && throw(TypeError(:get_attribute, "openPMD type $datatype is not supported in Julia", Any, datatype))
     attribute = get_attribute(T, attributes, key)
     attribute === nothing && return nothing
     return attribute::Datatypes
@@ -80,6 +102,19 @@ for (suffix, Type) in [("schar", Cchar), ("short", Cshort), ("int", Cint), ("lon
         !Bool(did_exist) && return nothing
         return c_value[]::$Type
     end
+    funname = Symbol(:openPMD_Attributable_getAttribute_vec_, suffix)
+    @eval function get_attribute(::Type{<:AbstractVector{$Type}}, attributes::Attributes, key::AbstractString)
+        c_values_ptr_ref = Ref{Ptr{$Type}}()
+        c_size = Ref{Csize_t}()
+        did_exist = @ccall libopenPMD_c.$funname(attributes::Ptr{Cvoid}, key::Cstring, c_values_ptr_ref::Ref{Ptr{$Type}},
+                                                 c_size::Ref{Csize_t})::UInt8
+        !Bool(did_exist) && return nothing
+        size = Int(c_size[])
+        c_values_ptr = c_values_ptr_ref[]
+        values = $Type[unsafe_load(c_values_ptr, n) for n in 1:size]
+        @ccall free(c_values_ptr::Ptr{Cvoid})::Cvoid
+        return values::AbstractVector{$Type}
+    end
 end
 function get_attribute(::Type{Char}, attributes::Attributes, key::AbstractString)
     value = _getattribute(Cchar, attributes, key)
@@ -95,6 +130,22 @@ function get_attribute(::Type{<:AbstractString}, attributes::Attributes, key::Ab
     value = unsafe_string(c_value)
     @ccall free(c_value::Ptr{Cvoid})::Cvoid
     return value::AbstractString
+end
+function get_attribute(::Type{<:AbstractVector{<:AbstractString}}, attributes::Attributes, key::AbstractString)
+    c_values_ptr_ref = Ref{Ptr{Ptr{Cchar}}}()
+    c_size = Ref{Csize_t}()
+    did_exist = @ccall libopenPMD_c.openPMD_Attributable_getAttribute_vec_string(attributes::Ptr{Cvoid}, key::Cstring,
+                                                                                 c_values_ptr_ref::Ref{Ptr{Ptr{Cchar}}},
+                                                                                 c_size::Ref{Csize_t})::UInt8
+    !Bool(did_exist) && return nothing
+    c_values_ptr = c_values_ptr_ref[]
+    size = Int(c_size[])
+    values = String[unsafe_string(unsafe_load(c_values_ptr, n)) for n in 1:size]
+    for n in 1:size
+        @ccall free(unsafe_load(c_values_ptr, n)::Ptr{Cvoid})::Cvoid
+    end
+    @ccall free(c_values_ptr::Ptr{Cvoid})::Cvoid
+    return values::AbstractVector{<:AbstractString}
 end
 function get_attribute(::Type{Bool}, attributes::Attributes, key::AbstractString)
     c_value = Ref{UInt8}()

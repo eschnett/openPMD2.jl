@@ -40,10 +40,22 @@
     Datatype_UNDEFINED = 38
 end
 
-const datatypes = Type[Cchar, Cuchar, Cchar, Cshort, Cint, Clong, Clonglong, Cushort, Culong, Culonglong, Cfloat, Cdouble,
-                       Complex{Cfloat}, Complex{Cdouble}, AbstractString, Bool]
+const datatypes = Type[Cchar, Cuchar, Cchar,
+                       Cshort, Cint, Clong, Clonglong,
+                       Cushort, Cuint, Culong, Culonglong,
+                       Cfloat, Cdouble,
+                       Complex{Cfloat}, Complex{Cdouble},
+                       AbstractString,
+                       AbstractVector{Cchar}, AbstractVector{Cuchar}, AbstractVector{Cchar},
+                       AbstractVector{Cshort}, AbstractVector{Cint}, AbstractVector{Clong}, AbstractVector{Clonglong},
+                       AbstractVector{Cushort}, AbstractVector{Cuint}, AbstractVector{Culong}, AbstractVector{Culonglong},
+                       AbstractVector{Cfloat}, AbstractVector{Cdouble},
+                       AbstractVector{Complex{Cfloat}}, AbstractVector{Complex{Cdouble}},
+                       AbstractVector{<:AbstractString},
+                       Bool]
 const Datatypes = Union{datatypes...}
 
+# Clong is the same as either Cint or Clonglong, similarly for Culong
 openpmd_datatype(::Type{Cchar}) = Datatype_SCHAR
 openpmd_datatype(::Type{Cuchar}) = Datatype_UCHAR
 openpmd_datatype(::Type{Cshort}) = Datatype_SHORT
@@ -57,16 +69,55 @@ openpmd_datatype(::Type{Cdouble}) = Datatype_DOUBLE
 openpmd_datatype(::Type{Complex{Cfloat}}) = Datatype_CFLOAT
 openpmd_datatype(::Type{Complex{Cdouble}}) = Datatype_CDOUBLE
 openpmd_datatype(::Type{<:AbstractString}) = Datatype_STRING
+openpmd_datatype(::Type{<:AbstractVector{Cchar}}) = Datatype_VEC_SCHAR
+openpmd_datatype(::Type{<:AbstractVector{Cuchar}}) = Datatype_VEC_UCHAR
+openpmd_datatype(::Type{<:AbstractVector{Cshort}}) = Datatype_VEC_SHORT
+openpmd_datatype(::Type{<:AbstractVector{Cint}}) = Datatype_VEC_INT
+openpmd_datatype(::Type{<:AbstractVector{Clonglong}}) = Datatype_VEC_LONGLONG
+openpmd_datatype(::Type{<:AbstractVector{Cushort}}) = Datatype_VEC_USHORT
+openpmd_datatype(::Type{<:AbstractVector{Cuint}}) = Datatype_VEC_UINT
+openpmd_datatype(::Type{<:AbstractVector{Culonglong}}) = Datatype_VEC_ULONGLONG
+openpmd_datatype(::Type{<:AbstractVector{Cfloat}}) = Datatype_VEC_FLOAT
+openpmd_datatype(::Type{<:AbstractVector{Cdouble}}) = Datatype_VEC_DOUBLE
+openpmd_datatype(::Type{<:AbstractVector{Complex{Cfloat}}}) = Datatype_VEC_CFLOAT
+openpmd_datatype(::Type{<:AbstractVector{Complex{Cdouble}}}) = Datatype_VEC_CDOUBLE
+openpmd_datatype(::Type{<:AbstractVector{<:AbstractString}}) = Datatype_VEC_STRING
 openpmd_datatype(::Type{Bool}) = Datatype_BOOL
 # openpmd_datatype(::Type) = Datatype_UNDEFINED
 openpmd_datatype(::T) where {T<:Datatypes} = datatype(T)
 
-const julia_types = Dict{Datatype,Type}(Datatype_CHAR => Cchar, Datatype_SCHAR => Cchar, Datatype_UCHAR => Cuchar,
-                                        Datatype_SHORT => Cshort, Datatype_INT => Cint, Datatype_LONG => Clong,
-                                        Datatype_LONGLONG => Clonglong, Datatype_USHORT => Cushort, Datatype_UINT => Cuint,
-                                        Datatype_ULONG => Culong, Datatype_ULONGLONG => Culonglong, Datatype_FLOAT => Cfloat,
-                                        Datatype_DOUBLE => Cdouble, Datatype_CFLOAT => Complex{Cfloat},
-                                        Datatype_CDOUBLE => Complex{Cdouble}, Datatype_STRING => AbstractString,
+const julia_types = Dict{Datatype,Type}(Datatype_CHAR => Cchar,
+                                        Datatype_SCHAR => Cchar,
+                                        Datatype_UCHAR => Cuchar,
+                                        Datatype_SHORT => Cshort,
+                                        Datatype_INT => Cint,
+                                        Datatype_LONG => Clong,
+                                        Datatype_LONGLONG => Clonglong,
+                                        Datatype_USHORT => Cushort,
+                                        Datatype_UINT => Cuint,
+                                        Datatype_ULONG => Culong,
+                                        Datatype_ULONGLONG => Culonglong,
+                                        Datatype_FLOAT => Cfloat,
+                                        Datatype_DOUBLE => Cdouble,
+                                        Datatype_CFLOAT => Complex{Cfloat},
+                                        Datatype_CDOUBLE => Complex{Cdouble},
+                                        Datatype_STRING => AbstractString,
+                                        Datatype_VEC_CHAR => AbstractVector{Cchar},
+                                        Datatype_VEC_SCHAR => AbstractVector{Cchar},
+                                        Datatype_VEC_UCHAR => AbstractVector{Cuchar},
+                                        Datatype_VEC_SHORT => AbstractVector{Cshort},
+                                        Datatype_VEC_INT => AbstractVector{Cint},
+                                        Datatype_VEC_LONG => AbstractVector{Clong},
+                                        Datatype_VEC_LONGLONG => AbstractVector{Clonglong},
+                                        Datatype_VEC_USHORT => AbstractVector{Cushort},
+                                        Datatype_VEC_UINT => AbstractVector{Cuint},
+                                        Datatype_VEC_ULONG => AbstractVector{Culong},
+                                        Datatype_VEC_ULONGLONG => AbstractVector{Culonglong},
+                                        Datatype_VEC_FLOAT => AbstractVector{Cfloat},
+                                        Datatype_VEC_DOUBLE => AbstractVector{Cdouble},
+                                        Datatype_VEC_CFLOAT => AbstractVector{Complex{Cfloat}},
+                                        Datatype_VEC_CDOUBLE => AbstractVector{Complex{Cdouble}},
+                                        Datatype_VEC_STRING => AbstractVector{AbstractString},
                                         Datatype_BOOL => Bool)
 
 # size_t openPMD_toBytes(openPMD_Datatype datatype);

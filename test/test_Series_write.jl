@@ -12,9 +12,42 @@
     @test length(keys(attributes(series))) == length(attributes(series))
     @test length(collect(keys(attributes(series)))) == length(keys(attributes(series)))
 
-    attributes(series)["hello"] = Cint(42)
-    @test "hello" in keys(attributes(series))
-    @test attributes(series)["hello"] === Cint(42)
+    # Test attributes
+    for T in [Int8, Int16, Int32, Int64,
+              UInt8, UInt16, UInt32, UInt64,
+              Float32, Float64,
+              Complex{Float32}, Complex{Float64},
+              String,
+              Vector{Int8}, Vector{Int16}, Vector{Int32}, Vector{Int64},
+              Vector{UInt8}, Vector{UInt16}, Vector{UInt32}, Vector{UInt64},
+              Vector{Float32}, Vector{Float64},
+              Vector{Complex{Float32}}, Vector{Complex{Float64}},
+              Vector{String},
+              Bool]
+        if T <: Bool
+            value = true
+        elseif T <: Union{Integer,Real,Complex}
+            value = T(42)
+        elseif T <: String
+            value = "42"
+        elseif T <: Vector{<:Union{Integer,Real,Complex}}
+            value = eltype(T)[10, 11, 13]
+        elseif T <: Vector{String}
+            value = eltype(T)["hello", "world", "∇Δ☐√π"]
+        elseif T <: Bool
+            value = true
+        else
+            @assert false
+        end
+        @test !("hello-$T" in keys(attributes(series)))
+        attributes(series)["hello-$T"] = value
+        @test "hello-$T" in keys(attributes(series))
+        if T <: Union{AbstractString,AbstractVector}
+            @test attributes(series)["hello-$T"] == value
+        else
+            @test attributes(series)["hello-$T"] === value
+        end
+    end
 
     openPMD_version = get_openPMD_version(series)
     @test openPMD_version isa AbstractString
